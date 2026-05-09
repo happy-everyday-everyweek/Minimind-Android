@@ -1,0 +1,17 @@
+- [ ] 后端 `GET /v1/health` 端点返回正确的健康状态
+- [ ] 后端 `GET /v1/models` 端点返回模型信息，格式兼容 OpenAI API
+- [ ] 后端 CORS 中间件正确处理跨域请求
+- [ ] 后端 Bearer Token 鉴权：携带正确 token 请求成功，错误 token 返回 401，未配置 api_key 时跳过鉴权
+- [ ] 后端现有 `/v1/chat/completions` 流式和非流式响应功能不受影响
+- [ ] 部署脚本 `deploy_linux.sh` 可在全新 Linux 实例上完成一键部署
+- [ ] systemd service 文件支持 start/stop/restart 操作
+- [ ] Android 项目可成功编译构建
+- [ ] Android 客户端可配置服务器地址和 API Key，连接测试正常
+- [ ] Android 聊天页面可发送消息并接收流式响应，逐字显示
+- [ ] Android 思考内容以可折叠区域展示
+- [ ] Android 工具调用以卡片形式展示
+- [ ] Android 参数设置（Temperature、Max Tokens、历史轮次、思考模式）生效
+- [ ] Android 会话历史保存在本地 Room 数据库，重启应用后可恢复
+- [ ] Android 多语言切换（中文/English）正常工作
+- [ ] Android 网络异常时显示友好提示，不崩溃
+- [ ] 端到端：Android 客户端连接 Linux 后端完成一次完整对话（含流式响应）
