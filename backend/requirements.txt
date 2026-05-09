@@ -1,0 +1,10 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+pydantic==2.11.5
+websockets==14.2
+torch==2.6.0
+transformers==4.57.6
+datasets==3.6.0
+openai==1.59.6
+jsonlines==4.0.0
