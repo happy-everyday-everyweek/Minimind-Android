@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -103,7 +104,7 @@ private fun AppHeader() {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = Primary
+            containerColor = PrimaryVariant
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -129,6 +130,12 @@ private fun AppHeader() {
                 text = "轻量级大语言模型训练与推理平台",
                 style = MaterialTheme.typography.bodyLarge,
                 color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.9f)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "MiniMind 是一个轻量级大语言模型训练与推理平台。你可以用它来训练自己的 AI 模型，也可以直接与已训练好的模型对话。\n\n训练一个语言模型通常需要以下步骤：首先进行预训练让模型学会语言基础，然后通过有监督微调让模型学会对话，之后还可以选择性地进行知识蒸馏、LoRA 微调、强化学习等高级训练来进一步提升模型能力。",
+                style = MaterialTheme.typography.bodySmall,
+                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.75f)
             )
         }
     }
@@ -156,11 +163,11 @@ private fun BackendStatusCard(
                     .clip(CircleShape)
                     .background(
                         when (status) {
-                            BackendManager.BackendStatus.ONLINE -> SuccessGreen
-                            BackendManager.BackendStatus.OFFLINE -> ErrorRed
-                            BackendManager.BackendStatus.ERROR -> ErrorRed
-                            BackendManager.BackendStatus.CHECKING -> WarningOrange
-                            BackendManager.BackendStatus.UNKNOWN -> WarningOrange
+                            BackendManager.BackendStatus.ONLINE -> Color(0xFF333333)
+                            BackendManager.BackendStatus.OFFLINE -> Color(0xFFBBBBBB)
+                            BackendManager.BackendStatus.ERROR -> Color(0xFFBBBBBB)
+                            BackendManager.BackendStatus.CHECKING -> Color(0xFF888888)
+                            BackendManager.BackendStatus.UNKNOWN -> Color(0xFF888888)
                         }
                     )
             )
@@ -213,7 +220,7 @@ private fun QuickStartSection(
             title = "开始对话",
             description = "与模型进行推理对话",
             icon = Icons.Default.Chat,
-            containerColor = Primary,
+            containerColor = PrimaryVariant,
             onClick = onNavigateToInference
         )
         QuickStartCard(
@@ -222,7 +229,7 @@ private fun QuickStartSection(
             description = "训练自定义模型",
             icon = Icons.Default.School,
             containerColor = Secondary,
-            contentColor = Primary,
+            contentColor = PrimaryVariant,
             onClick = onNavigateToTraining
         )
     }
@@ -336,9 +343,9 @@ private fun ActivityCard(activity: ActivityRecord) {
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
                 tint = when (activity.status) {
-                    "completed" -> SuccessGreen
-                    "running" -> Primary
-                    "failed" -> ErrorRed
+                    "completed" -> Color(0xFF333333)
+                    "running" -> Color(0xFF333333)
+                    "failed" -> Color(0xFFBBBBBB)
                     else -> MaterialTheme.colorScheme.onSurface
                 }
             )
@@ -358,9 +365,9 @@ private fun ActivityCard(activity: ActivityRecord) {
             Surface(
                 shape = RoundedCornerShape(4.dp),
                 color = when (activity.status) {
-                    "completed" -> SuccessGreen.copy(alpha = 0.1f)
-                    "running" -> Primary.copy(alpha = 0.1f)
-                    "failed" -> ErrorRed.copy(alpha = 0.1f)
+                    "completed" -> Color(0xFF333333).copy(alpha = 0.1f)
+                    "running" -> Color(0xFF333333).copy(alpha = 0.1f)
+                    "failed" -> Color(0xFFBBBBBB).copy(alpha = 0.1f)
                     else -> MaterialTheme.colorScheme.surfaceVariant
                 }
             ) {
@@ -374,9 +381,9 @@ private fun ActivityCard(activity: ActivityRecord) {
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.labelSmall,
                     color = when (activity.status) {
-                        "completed" -> SuccessGreen
-                        "running" -> Primary
-                        "failed" -> ErrorRed
+                        "completed" -> Color(0xFF333333)
+                        "running" -> Color(0xFF333333)
+                        "failed" -> Color(0xFFBBBBBB)
                         else -> MaterialTheme.colorScheme.onSurface
                     }
                 )

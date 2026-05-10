@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.minimind.app.network.ApiClient
@@ -59,6 +60,21 @@ fun PretrainConfigScreen(onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    text = "预训练是训练语言模型的第一步。模型会从大量文本数据中学习语言的基础规律，包括词汇含义、语法结构、常识知识等。你可以把它理解为让模型\"广泛阅读\"的过程。\n\n选择数据集：数据越多、质量越高，模型学到的知识越丰富。\"mini\"版本数据量较少，适合快速测试；完整版本数据量更大，效果更好但耗时更长。\n\n模型配置：隐藏层维度越大，模型的\"脑容量\"越大，能学到的知识越多，但需要的计算资源也越多。层数同理。MoE（混合专家）架构可以在不增加计算量的情况下提升模型能力。",
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+
             Text(
                 text = "数据集配置",
                 style = MaterialTheme.typography.titleMedium,
@@ -202,8 +218,8 @@ fun PretrainConfigScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (it.startsWith("成功")) com.minimind.app.ui.theme.SuccessGreen.copy(alpha = 0.1f)
-                        else com.minimind.app.ui.theme.ErrorRed.copy(alpha = 0.1f)
+                        containerColor = if (it.startsWith("成功")) Color(0xFF333333).copy(alpha = 0.1f)
+                        else Color(0xFF888888).copy(alpha = 0.1f)
                     )
                 ) {
                     Text(

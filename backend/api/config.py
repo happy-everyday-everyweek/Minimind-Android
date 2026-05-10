@@ -1,8 +1,11 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
+import json
+import os
 
 from services.distillation_service import distillation_service
+from core.config import RESOURCE_LIMITS_CONFIG_PATH, DEFAULT_RESOURCE_LIMITS
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 
@@ -63,3 +66,43 @@ def _mask_key(key: str) -> str:
     if not key or len(key) <= 8:
         return "*" * len(key) if key else ""
     return key[:4] + "*" * (len(key) - 8) + key[-4:]
+
+
+class ResourceLimitsConfig(BaseModel):
+    max_cpu_percent: int = 80
+    max_memory_mb: int = 2048
+    max_training_processes: int = 1
+
+
+def _load_resource_limits() -> dict:
+    if os.path.exists(RESOURCE_LIMITS_CONFIG_PATH):
+        try:
+            with open(RESOURCE_LIMITS_CONFIG_PATH, "r", encoding="utf-8") as f:
+                saved = json.load(f)
+                return {**DEFAULT_RESOURCE_LIMITS, **saved}
+        except Exception:
+            pass
+    return dict(DEFAULT_RESOURCE_LIMITS)
+
+
+def _save_resource_limits(config: dict):
+    with open(RESOURCE_LIMITS_CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
+
+
+@router.get("/resource-limits")
+async def get_resource_limits():
+    return _load_resource_limits()
+
+
+@router.put("/resource-limits")
+async def update_resource_limits(config: ResourceLimitsConfig):
+    data = config.model_dump()
+    if data["max_cpu_percent"] < 1 or data["max_cpu_percent"] > 100:
+        raise HTTPException(status_code=400, detail="CPU 使用率上限必须在 1-100 之间")
+    if data["max_memory_mb"] < 256:
+        raise HTTPException(status_code=400, detail="内存使用上限不能低于 256MB")
+    if data["max_training_processes"] < 1:
+        raise HTTPException(status_code=400, detail="最大同时训练进程数不能小于 1")
+    _save_resource_limits(data)
+    return {"message": "资源限制配置已更新"}

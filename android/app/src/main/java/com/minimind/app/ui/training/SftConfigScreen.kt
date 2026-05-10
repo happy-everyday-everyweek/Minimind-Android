@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.minimind.app.network.ApiClient
@@ -53,6 +54,21 @@ fun SftConfigScreen(onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    text = "有监督微调是在预训练模型的基础上，用带有正确答案的对话数据来教模型如何与用户交互。预训练让模型学会了\"说话\"，SFT 则教模型学会\"对话\"。\n\n基础权重：选择预训练阶段产出的模型权重作为起点。数据集选择：SFT 数据包含了多轮对话、问答、工具调用等多种格式，模型会学习这些格式来更好地回应用户。",
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+
             Text(
                 text = "基础权重",
                 style = MaterialTheme.typography.titleMedium,
@@ -140,8 +156,8 @@ fun SftConfigScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (it.startsWith("成功")) com.minimind.app.ui.theme.SuccessGreen.copy(alpha = 0.1f)
-                        else com.minimind.app.ui.theme.ErrorRed.copy(alpha = 0.1f)
+                        containerColor = if (it.startsWith("成功")) Color(0xFF333333).copy(alpha = 0.1f)
+                        else Color(0xFF888888).copy(alpha = 0.1f)
                     )
                 ) {
                     Text(text = it, modifier = Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)

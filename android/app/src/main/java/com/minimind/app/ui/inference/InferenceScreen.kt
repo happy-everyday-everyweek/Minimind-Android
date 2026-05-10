@@ -38,6 +38,7 @@ fun InferenceScreen(
     var inputText by remember { mutableStateOf("") }
     var showSettings by remember { mutableStateOf(false) }
     var showModelSelector by remember { mutableStateOf(false) }
+    var showHelp by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -61,7 +62,7 @@ fun InferenceScreen(
                                 text = models.find { it.id == selectedModelId }?.name ?: selectedModelId,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Primary
+                                color = PrimaryVariant
                             )
                             Icon(
                                 Icons.Default.ArrowDropDown,
@@ -95,7 +96,7 @@ fun InferenceScreen(
                         Icon(
                             Icons.Default.Tune,
                             contentDescription = "推理参数",
-                            tint = if (showSettings) Primary else MaterialTheme.colorScheme.onSurface
+                            tint = if (showSettings) PrimaryVariant else MaterialTheme.colorScheme.onSurface
                         )
                     }
                     IconButton(onClick = { viewModel.clearMessages() }) {
@@ -121,6 +122,47 @@ fun InferenceScreen(
                     openThinking = openThinking,
                     onOpenThinkingChange = { viewModel.updateOpenThinking(it) }
                 )
+            }
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showHelp = !showHelp },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "推理说明",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(
+                            imageVector = if (showHelp) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                        )
+                    }
+                    AnimatedVisibility(visible = showHelp) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "推理是使用训练好的模型来生成回答的过程。选择一个模型权重，输入你的问题，模型会根据它学到的知识来生成回答。\n\n参数说明：\n- Temperature：控制回答的随机性。值越低，回答越确定和保守；值越高，回答越多样和创意。\n- Top-P：控制候选词的范围。值越低，只从最可能的词中选择；值越高，考虑更多可能的词。\n- Max Tokens：控制回答的最大长度。\n- 思考模式：开启后，模型会先进行内部推理，再给出最终回答，适合需要深度思考的问题。",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                }
             }
 
             LazyColumn(
@@ -328,7 +370,7 @@ private fun MessageBubble(message: ChatMessage) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(2.dp),
-                        color = if (message.isUser) UserMessageFg else Primary
+                        color = if (message.isUser) UserMessageFg else PrimaryVariant
                     )
                 }
             }

@@ -25,7 +25,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Primary,
+    primary = PrimaryVariant,
     onPrimary = UserMessageFg,
     secondary = Secondary,
     onSecondary = OnBackgroundDark,
@@ -33,8 +33,8 @@ private val DarkColorScheme = darkColorScheme(
     onBackground = OnBackgroundDark,
     surface = SurfaceDark,
     onSurface = OnSurfaceDark,
-    error = ErrorRed,
-    onError = UserMessageFg
+    error = WarningOrange,
+    onError = OnBackgroundDark
 )
 
 @Composable

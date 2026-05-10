@@ -26,10 +26,8 @@ import com.minimind.app.network.ApiClient
 import com.minimind.app.network.WebSocketClient
 import com.minimind.app.network.WebSocketCallback
 import com.minimind.app.network.model.TrainingStatus
-import com.minimind.app.ui.theme.Primary
-import com.minimind.app.ui.theme.SuccessGreen
+import com.minimind.app.ui.theme.PrimaryVariant
 import com.minimind.app.ui.theme.ErrorRed
-import com.minimind.app.ui.theme.WarningOrange
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -151,7 +149,7 @@ fun TrainingMonitorScreen(
                             progress = status.step.toFloat() / status.totalSteps,
                             modifier = Modifier.weight(1f).height(8.dp),
                             shape = RoundedCornerShape(4.dp),
-                            color = Primary
+                            color = PrimaryVariant
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -335,12 +333,12 @@ private fun LossChart(
             val y = padding + (1f - (loss - minLoss) / safeRange) * chartHeight
             if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
         }
-        drawPath(path, color = Primary, style = Stroke(width = 3f))
+        drawPath(path, color = PrimaryVariant, style = Stroke(width = 3f))
 
         data.lastOrNull()?.let { (_, loss) ->
             val x = padding + chartWidth
             val y = padding + (1f - (loss - minLoss) / safeRange) * chartHeight
-            drawCircle(color = Primary, radius = 5f, center = Offset(x, y))
+            drawCircle(color = PrimaryVariant, radius = 5f, center = Offset(x, y))
         }
     }
 }

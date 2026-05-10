@@ -79,4 +79,10 @@ interface ApiService {
 
     @POST("/api/test_connection")
     suspend fun testConnection(@Body config: Map<String, String>): Map<String, String>
+
+    @GET("/api/config/resource-limits")
+    suspend fun getResourceLimits(): ResourceLimitsResponse
+
+    @PUT("/api/config/resource-limits")
+    suspend fun updateResourceLimits(@Body request: ResourceLimitsRequest): Map<String, String>
 }

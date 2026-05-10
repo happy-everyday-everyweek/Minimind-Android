@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.minimind.app.network.ApiClient
@@ -57,6 +58,21 @@ fun AgentConfigScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    text = "Agentic RL 训练模型学会使用外部工具来完成复杂任务。训练后的模型能够在对话中判断何时需要调用工具、调用哪个工具、如何使用工具返回的结果。\n\n你可以自定义工具列表（如查询天气、数学计算等）和奖励规则（如工具调用是否正确、结果是否匹配预期等），模型会通过强化学习逐渐掌握工具使用的技巧。",
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+
             Text(
                 text = "基础权重",
                 style = MaterialTheme.typography.titleMedium,
@@ -161,8 +177,8 @@ fun AgentConfigScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (it.startsWith("成功")) com.minimind.app.ui.theme.SuccessGreen.copy(alpha = 0.1f)
-                        else com.minimind.app.ui.theme.ErrorRed.copy(alpha = 0.1f)
+                        containerColor = if (it.startsWith("成功")) Color(0xFF333333).copy(alpha = 0.1f)
+                        else Color(0xFF888888).copy(alpha = 0.1f)
                     )
                 ) {
                     Text(text = it, modifier = Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)

@@ -6,28 +6,42 @@ import com.minimind.app.MiniMindApp
 import com.minimind.app.backend.BackendManager
 import com.minimind.app.data.PreferencesManager
 import com.minimind.app.network.ApiClient
+import com.minimind.app.network.model.ResourceLimitsRequest
+import com.minimind.app.network.model.ResourceLimitsResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+data class ResourceLimits(
+    val maxCpuPercent: Int = 80,
+    val maxMemoryMb: Int = 2048,
+    val maxTrainingProcesses: Int = 1
+)
+
 class SettingsViewModel : ViewModel() {
 
     private val preferencesManager = MiniMindApp.instance.preferencesManager
     private val backendManager = MiniMindApp.instance.backendManager
 
-    private val _apiProvider = MutableStateFlow("deepseek")
-    val apiProvider: StateFlow<String> = _apiProvider.asStateFlow()
-
-    private val _apiBase = MutableStateFlow("https://api.deepseek.com/v1")
+    private val _apiBase = MutableStateFlow("")
     val apiBase: StateFlow<String> = _apiBase.asStateFlow()
 
     private val _apiKey = MutableStateFlow("")
     val apiKey: StateFlow<String> = _apiKey.asStateFlow()
 
-    private val _apiModel = MutableStateFlow("deepseek-chat")
+    private val _apiModel = MutableStateFlow("")
     val apiModel: StateFlow<String> = _apiModel.asStateFlow()
+
+    private val _resourceLimits = MutableStateFlow(ResourceLimits())
+    val resourceLimits: StateFlow<ResourceLimits> = _resourceLimits.asStateFlow()
+
+    private val _isSavingLimits = MutableStateFlow(false)
+    val isSavingLimits: StateFlow<Boolean> = _isSavingLimits.asStateFlow()
+
+    private val _saveLimitsResult = MutableStateFlow<String?>(null)
+    val saveLimitsResult: StateFlow<String?> = _saveLimitsResult.asStateFlow()
 
     private val _backendStatus = MutableStateFlow(BackendManager.BackendStatus.UNKNOWN)
     val backendStatus: StateFlow<BackendManager.BackendStatus> = _backendStatus.asStateFlow()
@@ -43,9 +57,6 @@ class SettingsViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            preferencesManager.apiProvider.collect { _apiProvider.value = it }
-        }
-        viewModelScope.launch {
             preferencesManager.apiBase.collect { _apiBase.value = it }
         }
         viewModelScope.launch {
@@ -57,12 +68,8 @@ class SettingsViewModel : ViewModel() {
         viewModelScope.launch {
             backendManager.status.collect { _backendStatus.value = it }
         }
+        loadResourceLimits()
         checkBackendStatus()
-    }
-
-    fun updateApiProvider(provider: String) {
-        _apiProvider.value = provider
-        viewModelScope.launch { preferencesManager.saveApiProvider(provider) }
     }
 
     fun updateApiBase(base: String) {
@@ -78,6 +85,56 @@ class SettingsViewModel : ViewModel() {
     fun updateApiModel(model: String) {
         _apiModel.value = model
         viewModelScope.launch { preferencesManager.saveApiModel(model) }
+    }
+
+    fun updateMaxCpuPercent(value: Int) {
+        _resourceLimits.value = _resourceLimits.value.copy(maxCpuPercent = value.coerceIn(0, 100))
+    }
+
+    fun updateMaxMemoryMb(value: Int) {
+        _resourceLimits.value = _resourceLimits.value.copy(maxMemoryMb = value)
+    }
+
+    fun updateMaxTrainingProcesses(value: Int) {
+        _resourceLimits.value = _resourceLimits.value.copy(maxTrainingProcesses = value)
+    }
+
+    private fun loadResourceLimits() {
+        viewModelScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    ApiClient.apiService.getResourceLimits()
+                }
+                _resourceLimits.value = ResourceLimits(
+                    maxCpuPercent = response.max_cpu_percent,
+                    maxMemoryMb = response.max_memory_mb,
+                    maxTrainingProcesses = response.max_training_processes
+                )
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    fun saveResourceLimits() {
+        viewModelScope.launch {
+            _isSavingLimits.value = true
+            _saveLimitsResult.value = null
+            try {
+                val limits = _resourceLimits.value
+                val request = ResourceLimitsRequest(
+                    max_cpu_percent = limits.maxCpuPercent,
+                    max_memory_mb = limits.maxMemoryMb,
+                    max_training_processes = limits.maxTrainingProcesses
+                )
+                withContext(Dispatchers.IO) {
+                    ApiClient.apiService.updateResourceLimits(request)
+                }
+                _saveLimitsResult.value = "保存成功"
+            } catch (e: Exception) {
+                _saveLimitsResult.value = "保存失败: ${e.message}"
+            }
+            _isSavingLimits.value = false
+        }
     }
 
     fun testConnection() {

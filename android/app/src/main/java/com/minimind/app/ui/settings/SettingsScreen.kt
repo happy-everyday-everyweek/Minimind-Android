@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -27,16 +28,16 @@ fun SettingsScreen(
     onBack: () -> Unit,
     viewModel: SettingsViewModel = viewModel()
 ) {
-    val apiProvider by viewModel.apiProvider.collectAsState()
     val apiBase by viewModel.apiBase.collectAsState()
     val apiKey by viewModel.apiKey.collectAsState()
     val apiModel by viewModel.apiModel.collectAsState()
+    val resourceLimits by viewModel.resourceLimits.collectAsState()
+    val isSavingLimits by viewModel.isSavingLimits.collectAsState()
+    val saveLimitsResult by viewModel.saveLimitsResult.collectAsState()
     val backendStatus by viewModel.backendStatus.collectAsState()
     val isTesting by viewModel.isTesting.collectAsState()
     val testResult by viewModel.testResult.collectAsState()
     val isRestarting by viewModel.isRestarting.collectAsState()
-
-    var apiProviderExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -59,7 +60,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "LLM API 配置",
+                text = "外部模型 API 配置",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold
             )
@@ -69,42 +70,11 @@ fun SettingsScreen(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Box {
-                        OutlinedTextField(
-                            value = when (apiProvider) {
-                                "deepseek" -> "DeepSeek"
-                                "zhipu" -> "智谱"
-                                else -> "自定义"
-                            },
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("API 提供商预设") },
-                            modifier = Modifier.fillMaxWidth(),
-                            trailingIcon = {
-                                IconButton(onClick = { apiProviderExpanded = true }) {
-                                    Icon(Icons.Default.ArrowDropDown, null)
-                                }
-                            }
-                        )
-                        DropdownMenu(expanded = apiProviderExpanded, onDismissRequest = { apiProviderExpanded = false }) {
-                            DropdownMenuItem(text = { Text("DeepSeek") }, onClick = {
-                                viewModel.updateApiProvider("deepseek")
-                                viewModel.updateApiBase("https://api.deepseek.com/v1")
-                                viewModel.updateApiModel("deepseek-chat")
-                                apiProviderExpanded = false
-                            })
-                            DropdownMenuItem(text = { Text("智谱") }, onClick = {
-                                viewModel.updateApiProvider("zhipu")
-                                viewModel.updateApiBase("https://open.bigmodel.cn/api/paas/v4")
-                                viewModel.updateApiModel("glm-4")
-                                apiProviderExpanded = false
-                            })
-                            DropdownMenuItem(text = { Text("自定义") }, onClick = {
-                                viewModel.updateApiProvider("custom")
-                                apiProviderExpanded = false
-                            })
-                        }
-                    }
+                    Text(
+                        text = "配置一个兼容 OpenAI API 格式的大语言模型接口，用于知识蒸馏和 AI 辅助生成奖励函数。你需要提供 API 的访问地址、密钥和模型名称。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(
                         value = apiBase,
@@ -154,14 +124,104 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = if (result.startsWith("连接成功")) SuccessGreen.copy(alpha = 0.1f)
-                            else ErrorRed.copy(alpha = 0.1f)
+                            color = if (result.startsWith("连接成功")) Color(0xFF333333).copy(alpha = 0.1f)
+                            else Color(0xFF888888).copy(alpha = 0.1f)
                         ) {
                             Text(
                                 text = result,
                                 modifier = Modifier.padding(12.dp),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = if (result.startsWith("连接成功")) SuccessGreen else ErrorRed
+                                color = if (result.startsWith("连接成功")) Color(0xFF333333) else Color(0xFF888888)
+                            )
+                        }
+                    }
+                }
+            }
+
+            HorizontalDivider()
+
+            Text(
+                text = "资源限制",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "设置后端服务可以使用的系统资源上限，防止训练任务占用过多资源导致手机卡顿。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "CPU 使用率上限: ${resourceLimits.maxCpuPercent}%",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Slider(
+                        value = resourceLimits.maxCpuPercent.toFloat(),
+                        onValueChange = { viewModel.updateMaxCpuPercent(it.toInt()) },
+                        valueRange = 0f..100f,
+                        steps = 20,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = if (resourceLimits.maxMemoryMb == 0) "" else resourceLimits.maxMemoryMb.toString(),
+                        onValueChange = { viewModel.updateMaxMemoryMb(it.toIntOrNull() ?: 0) },
+                        label = { Text("内存使用上限 (MB)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = if (resourceLimits.maxTrainingProcesses == 0) "" else resourceLimits.maxTrainingProcesses.toString(),
+                        onValueChange = { viewModel.updateMaxTrainingProcesses(it.toIntOrNull() ?: 0) },
+                        label = { Text("最大同时训练进程数") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = { viewModel.saveResourceLimits() },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isSavingLimits,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        if (isSavingLimits) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("保存")
+                    }
+
+                    saveLimitsResult?.let { result ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (result.startsWith("保存成功")) Color(0xFF333333).copy(alpha = 0.1f)
+                            else Color(0xFF888888).copy(alpha = 0.1f)
+                        ) {
+                            Text(
+                                text = result,
+                                modifier = Modifier.padding(12.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (result.startsWith("保存成功")) Color(0xFF333333) else Color(0xFF888888)
                             )
                         }
                     }
@@ -193,11 +253,11 @@ fun SettingsScreen(
                                 .clip(CircleShape)
                                 .background(
                                     when (backendStatus) {
-                                        BackendManager.BackendStatus.ONLINE -> SuccessGreen
-                                        BackendManager.BackendStatus.OFFLINE -> ErrorRed
-                                        BackendManager.BackendStatus.ERROR -> ErrorRed
-                                        BackendManager.BackendStatus.CHECKING -> WarningOrange
-                                        BackendManager.BackendStatus.UNKNOWN -> WarningOrange
+                                        BackendManager.BackendStatus.ONLINE -> Color(0xFF333333)
+                                        BackendManager.BackendStatus.OFFLINE -> Color(0xFFBBBBBB)
+                                        BackendManager.BackendStatus.ERROR -> Color(0xFFBBBBBB)
+                                        BackendManager.BackendStatus.CHECKING -> Color(0xFF888888)
+                                        BackendManager.BackendStatus.UNKNOWN -> Color(0xFF888888)
                                     }
                                 )
                         )
@@ -212,10 +272,10 @@ fun SettingsScreen(
                             },
                             style = MaterialTheme.typography.bodyMedium,
                             color = when (backendStatus) {
-                                BackendManager.BackendStatus.ONLINE -> SuccessGreen
-                                BackendManager.BackendStatus.OFFLINE -> ErrorRed
-                                BackendManager.BackendStatus.ERROR -> ErrorRed
-                                else -> WarningOrange
+                                BackendManager.BackendStatus.ONLINE -> Color(0xFF333333)
+                                BackendManager.BackendStatus.OFFLINE -> Color(0xFFBBBBBB)
+                                BackendManager.BackendStatus.ERROR -> Color(0xFFBBBBBB)
+                                else -> Color(0xFF888888)
                             }
                         )
                     }
@@ -276,7 +336,7 @@ fun SettingsScreen(
                             Icons.Default.Psychology,
                             contentDescription = null,
                             modifier = Modifier.size(32.dp),
-                            tint = Primary
+                            tint = PrimaryVariant
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {

@@ -175,7 +175,7 @@ private fun ModelCard(
                     Icons.Default.Inventory2,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    tint = Primary
+                    tint = PrimaryVariant
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {

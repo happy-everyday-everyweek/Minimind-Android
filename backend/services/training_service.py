@@ -7,7 +7,7 @@ import json
 from typing import Dict, Optional, Any
 from datetime import datetime
 
-from core.config import TRAINING_SCRIPTS, TRAINER_DIR
+from core.config import TRAINING_SCRIPTS, TRAINER_DIR, RESOURCE_LIMITS_CONFIG_PATH, DEFAULT_RESOURCE_LIMITS
 from core.ws_manager import ws_manager
 
 
@@ -34,6 +34,23 @@ class TrainingService:
 
     def _generate_task_id(self) -> str:
         return uuid.uuid4().hex[:12]
+
+    def _load_resource_limits(self) -> dict:
+        if os.path.exists(RESOURCE_LIMITS_CONFIG_PATH):
+            try:
+                with open(RESOURCE_LIMITS_CONFIG_PATH, "r", encoding="utf-8") as f:
+                    saved = json.load(f)
+                    return {**DEFAULT_RESOURCE_LIMITS, **saved}
+            except Exception:
+                pass
+        return dict(DEFAULT_RESOURCE_LIMITS)
+
+    def _check_training_processes_limit(self):
+        limits = self._load_resource_limits()
+        max_processes = limits.get("max_training_processes", 1)
+        running_count = sum(1 for t in self.tasks.values() if t.status == "running")
+        if running_count >= max_processes:
+            raise ValueError(f"当前已有 {running_count} 个训练任务正在运行，超过最大同时训练进程数限制 ({max_processes})")
 
     def _build_common_args(self, params: dict) -> list:
         args = []
@@ -135,6 +152,7 @@ class TrainingService:
         await ws_manager.broadcast_training_status(task.task_id, task.status, task.message)
 
     async def start_pretrain(self, params: dict) -> str:
+        self._check_training_processes_limit()
         task_id = self._generate_task_id()
         script = TRAINING_SCRIPTS["pretrain"]
         args = self._build_common_args(params)
@@ -156,6 +174,7 @@ class TrainingService:
         return task_id
 
     async def start_sft(self, params: dict) -> str:
+        self._check_training_processes_limit()
         task_id = self._generate_task_id()
         script = TRAINING_SCRIPTS["sft"]
         args = self._build_common_args(params)
@@ -177,6 +196,7 @@ class TrainingService:
         return task_id
 
     async def start_lora(self, params: dict) -> str:
+        self._check_training_processes_limit()
         task_id = self._generate_task_id()
         script = TRAINING_SCRIPTS["lora"]
         args = self._build_common_args(params)
@@ -198,6 +218,7 @@ class TrainingService:
         return task_id
 
     async def start_dpo(self, params: dict) -> str:
+        self._check_training_processes_limit()
         task_id = self._generate_task_id()
         script = TRAINING_SCRIPTS["dpo"]
         args = self._build_common_args(params)
@@ -220,6 +241,7 @@ class TrainingService:
         return task_id
 
     async def start_ppo(self, params: dict) -> str:
+        self._check_training_processes_limit()
         task_id = self._generate_task_id()
         script = TRAINING_SCRIPTS["ppo"]
         args = self._build_common_args(params)
@@ -244,6 +266,7 @@ class TrainingService:
         return task_id
 
     async def start_grpo(self, params: dict) -> str:
+        self._check_training_processes_limit()
         task_id = self._generate_task_id()
         script = TRAINING_SCRIPTS["grpo"]
         args = self._build_common_args(params)
@@ -270,6 +293,7 @@ class TrainingService:
         return task_id
 
     async def start_agent(self, params: dict) -> str:
+        self._check_training_processes_limit()
         task_id = self._generate_task_id()
         script = TRAINING_SCRIPTS["agent"]
         args = self._build_common_args(params)
@@ -301,6 +325,7 @@ class TrainingService:
         return task_id
 
     async def start_distillation(self, params: dict) -> str:
+        self._check_training_processes_limit()
         task_id = self._generate_task_id()
         script = TRAINING_SCRIPTS["distillation"]
         args = self._build_common_args(params)

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.gson.Gson
@@ -82,6 +83,11 @@ fun AgentEnvEditorScreen(onBack: () -> Unit) {
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold
             )
+            Text(
+                text = "定义模型可以调用的工具。每个工具需要指定名称、描述和参数。模型会根据用户的提问判断是否需要调用工具，以及调用哪个工具。",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
 
             tools.forEachIndexed { index, tool ->
                 Card(
@@ -105,7 +111,7 @@ fun AgentEnvEditorScreen(onBack: () -> Unit) {
                                         tools = tools.toMutableList().also { it.removeAt(index) }
                                     }
                                 ) {
-                                    Icon(Icons.Default.Delete, contentDescription = "删除", tint = com.minimind.app.ui.theme.ErrorRed)
+                                    Icon(Icons.Default.Delete, contentDescription = "删除", tint = Color(0xFF666666))
                                 }
                             }
                         }
@@ -243,6 +249,11 @@ fun AgentEnvEditorScreen(onBack: () -> Unit) {
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold
             )
+            Text(
+                text = "定义如何评价模型的表现。你可以添加多条规则，每条规则指定一个评价维度和对应的奖惩分值。训练时系统会根据这些规则自动计算奖励。",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
 
             rewardRules.forEachIndexed { index, rule ->
                 Card(
@@ -260,7 +271,7 @@ fun AgentEnvEditorScreen(onBack: () -> Unit) {
                                 IconButton(onClick = {
                                     rewardRules = rewardRules.toMutableList().also { it.removeAt(index) }
                                 }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "删除", tint = com.minimind.app.ui.theme.ErrorRed)
+                                    Icon(Icons.Default.Delete, contentDescription = "删除", tint = Color(0xFF666666))
                                 }
                             }
                         }
@@ -420,6 +431,11 @@ fun AgentEnvEditorScreen(onBack: () -> Unit) {
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold
             )
+            Text(
+                text = "定义用于验证模型行为的测试用例。每个场景包含一个用户输入、预期的工具调用和预期输出，帮助你评估模型是否学会了正确使用工具。",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
 
             testScenarios.forEachIndexed { index, scenario ->
                 Card(
@@ -437,7 +453,7 @@ fun AgentEnvEditorScreen(onBack: () -> Unit) {
                                 IconButton(onClick = {
                                     testScenarios = testScenarios.toMutableList().also { it.removeAt(index) }
                                 }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "删除", tint = com.minimind.app.ui.theme.ErrorRed)
+                                    Icon(Icons.Default.Delete, contentDescription = "删除", tint = Color(0xFF666666))
                                 }
                             }
                         }

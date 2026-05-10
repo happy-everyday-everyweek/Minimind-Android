@@ -15,7 +15,6 @@ class PreferencesManager(private val context: Context) {
 
     companion object {
         val KEY_BASE_URL = stringPreferencesKey("base_url")
-        val KEY_API_PROVIDER = stringPreferencesKey("api_provider")
         val KEY_API_BASE = stringPreferencesKey("api_base")
         val KEY_API_KEY = stringPreferencesKey("api_key")
         val KEY_API_MODEL = stringPreferencesKey("api_model")
@@ -25,12 +24,8 @@ class PreferencesManager(private val context: Context) {
         prefs[KEY_BASE_URL] ?: "http://127.0.0.1:8000"
     }
 
-    val apiProvider: Flow<String> = context.dataStore.data.map { prefs ->
-        prefs[KEY_API_PROVIDER] ?: "deepseek"
-    }
-
     val apiBase: Flow<String> = context.dataStore.data.map { prefs ->
-        prefs[KEY_API_BASE] ?: "https://api.deepseek.com/v1"
+        prefs[KEY_API_BASE] ?: ""
     }
 
     val apiKey: Flow<String> = context.dataStore.data.map { prefs ->
@@ -38,18 +33,12 @@ class PreferencesManager(private val context: Context) {
     }
 
     val apiModel: Flow<String> = context.dataStore.data.map { prefs ->
-        prefs[KEY_API_MODEL] ?: "deepseek-chat"
+        prefs[KEY_API_MODEL] ?: ""
     }
 
     suspend fun saveBaseUrl(url: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_BASE_URL] = url
-        }
-    }
-
-    suspend fun saveApiProvider(provider: String) {
-        context.dataStore.edit { prefs ->
-            prefs[KEY_API_PROVIDER] = provider
         }
     }
 

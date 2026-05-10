@@ -104,3 +104,15 @@ data class TrainingStatus(
 data class TrainingStartResponse(
     @SerializedName("task_id") val taskId: String
 )
+
+data class ResourceLimitsRequest(
+    @SerializedName("max_cpu_percent") val max_cpu_percent: Int = 80,
+    @SerializedName("max_memory_mb") val max_memory_mb: Int = 2048,
+    @SerializedName("max_training_processes") val max_training_processes: Int = 1
+)
+
+data class ResourceLimitsResponse(
+    @SerializedName("max_cpu_percent") val max_cpu_percent: Int = 80,
+    @SerializedName("max_memory_mb") val max_memory_mb: Int = 2048,
+    @SerializedName("max_training_processes") val max_training_processes: Int = 1
+)

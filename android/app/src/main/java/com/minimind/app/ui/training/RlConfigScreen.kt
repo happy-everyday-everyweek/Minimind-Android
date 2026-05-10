@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.minimind.app.network.ApiClient
@@ -67,6 +68,21 @@ fun RlConfigScreen(onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    text = "强化学习通过\"奖励\"机制来优化模型行为。模型会尝试生成不同的回答，表现好的获得正奖励，表现差的获得负奖励，从而逐渐学会更好的回答方式。\n\n三种算法说明：\n- DPO（直接偏好优化）：使用人类标注的偏好数据（好回答 vs 差回答）来训练，实现简单，适合入门。\n- PPO（近端策略优化）：经典的强化学习算法，通过奖励模型对回答打分来训练，效果更灵活但需要更多计算资源。\n- GRPO（分组相对策略优化）：对同一问题生成多个回答，通过组内比较来训练，训练更稳定，是目前主流的强化学习方法。",
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+
             Text(
                 text = "算法选择",
                 style = MaterialTheme.typography.titleMedium,
@@ -161,8 +177,8 @@ fun RlConfigScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (it.startsWith("成功")) com.minimind.app.ui.theme.SuccessGreen.copy(alpha = 0.1f)
-                        else com.minimind.app.ui.theme.ErrorRed.copy(alpha = 0.1f)
+                        containerColor = if (it.startsWith("成功")) Color(0xFF333333).copy(alpha = 0.1f)
+                        else Color(0xFF888888).copy(alpha = 0.1f)
                     )
                 ) {
                     Text(text = it, modifier = Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)

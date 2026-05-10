@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -23,11 +24,9 @@ fun DistillationConfigScreen(onBack: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
-    var apiProvider by remember { mutableStateOf("deepseek") }
-    var apiProviderExpanded by remember { mutableStateOf(false) }
-    var teacherApiBase by remember { mutableStateOf("https://api.deepseek.com/v1") }
+    var teacherApiBase by remember { mutableStateOf("") }
     var teacherApiKey by remember { mutableStateOf("") }
-    var teacherModelName by remember { mutableStateOf("deepseek-chat") }
+    var teacherModelName by remember { mutableStateOf("") }
     var studentWeight by remember { mutableStateOf("full_sft") }
     var studentWeightExpanded by remember { mutableStateOf(false) }
     var dataset by remember { mutableStateOf("distill_data") }
@@ -57,47 +56,26 @@ fun DistillationConfigScreen(onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    text = "知识蒸馏是借助更强大的模型来提升你的模型能力的方法。你需要配置一个外部大语言模型的 API 接口作为\"教师模型\"。\n\n工作原理：系统会将你提供的问题发送给教师模型，获取它的高质量回答，然后让你的模型（学生模型）学习这些回答。这样你的小模型也能获得接近大模型的表现。\n\n教师模型 API：你需要提供 API 的访问地址、密钥和模型名称。这些信息可以从你的 API 服务商处获取。",
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+
             Text(
                 text = "教师模型 API 配置",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
-            Box {
-                OutlinedTextField(
-                    value = when (apiProvider) {
-                        "deepseek" -> "DeepSeek"
-                        "zhipu" -> "智谱"
-                        else -> "自定义"
-                    },
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("API 提供商") },
-                    modifier = Modifier.fillMaxWidth(),
-                    trailingIcon = {
-                        IconButton(onClick = { apiProviderExpanded = true }) {
-                            Icon(androidx.compose.material.icons.Icons.Default.ArrowDropDown, null)
-                        }
-                    }
-                )
-                DropdownMenu(expanded = apiProviderExpanded, onDismissRequest = { apiProviderExpanded = false }) {
-                    DropdownMenuItem(text = { Text("DeepSeek") }, onClick = {
-                        apiProvider = "deepseek"
-                        teacherApiBase = "https://api.deepseek.com/v1"
-                        teacherModelName = "deepseek-chat"
-                        apiProviderExpanded = false
-                    })
-                    DropdownMenuItem(text = { Text("智谱") }, onClick = {
-                        apiProvider = "zhipu"
-                        teacherApiBase = "https://open.bigmodel.cn/api/paas/v4"
-                        teacherModelName = "glm-4"
-                        apiProviderExpanded = false
-                    })
-                    DropdownMenuItem(text = { Text("自定义") }, onClick = {
-                        apiProvider = "custom"
-                        apiProviderExpanded = false
-                    })
-                }
-            }
             OutlinedTextField(
                 value = teacherApiBase,
                 onValueChange = { teacherApiBase = it },
@@ -184,8 +162,8 @@ fun DistillationConfigScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (it.startsWith("成功")) com.minimind.app.ui.theme.SuccessGreen.copy(alpha = 0.1f)
-                        else com.minimind.app.ui.theme.ErrorRed.copy(alpha = 0.1f)
+                        containerColor = if (it.startsWith("成功")) Color(0xFF333333).copy(alpha = 0.1f)
+                        else Color(0xFF888888).copy(alpha = 0.1f)
                     )
                 ) {
                     Text(text = it, modifier = Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)

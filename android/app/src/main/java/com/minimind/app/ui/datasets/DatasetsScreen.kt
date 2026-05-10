@@ -58,7 +58,7 @@ fun DatasetsScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { filePickerLauncher.launch("*/*") },
-                containerColor = Primary
+                containerColor = PrimaryVariant
             ) {
                 if (isUploading) {
                     CircularProgressIndicator(
@@ -205,7 +205,7 @@ private fun DatasetCard(
                     Icons.Default.Dataset,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    tint = Primary
+                    tint = PrimaryVariant
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {

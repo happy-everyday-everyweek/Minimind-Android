@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.minimind.app.network.ApiClient
@@ -54,6 +55,21 @@ fun LoraConfigScreen(onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    text = "LoRA 是一种参数高效的微调方法。与全参数微调不同，LoRA 只训练模型中极少量新增的参数（通常不到总参数的 1%），就能让模型适应新的任务或领域。\n\n适用场景：当你想让模型在某个特定领域（如医学、法律、编程等）表现更好，或者想让模型学会特定的对话风格时，LoRA 是最合适的选择。它训练速度快、占用资源少，非常适合在手机上运行。\n\nRank 和 Alpha：这两个参数控制 LoRA 的\"学习容量\"。Rank 越大，LoRA 能学到的内容越复杂，但训练成本也越高。Alpha 控制学习强度。一般保持默认值即可。",
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+
             Text(
                 text = "基础权重",
                 style = MaterialTheme.typography.titleMedium,
@@ -156,8 +172,8 @@ fun LoraConfigScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (it.startsWith("成功")) com.minimind.app.ui.theme.SuccessGreen.copy(alpha = 0.1f)
-                        else com.minimind.app.ui.theme.ErrorRed.copy(alpha = 0.1f)
+                        containerColor = if (it.startsWith("成功")) Color(0xFF333333).copy(alpha = 0.1f)
+                        else Color(0xFF888888).copy(alpha = 0.1f)
                     )
                 ) {
                     Text(text = it, modifier = Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)

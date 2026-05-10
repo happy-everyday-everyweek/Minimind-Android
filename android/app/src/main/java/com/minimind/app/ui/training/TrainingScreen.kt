@@ -15,7 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.minimind.app.ui.theme.*
@@ -77,6 +79,9 @@ fun TrainingScreen(
                     step = step,
                     onClick = {
                         routeToNav[step.route]?.invoke()
+                    },
+                    onSkip = {
+                        viewModel.skipStep(index)
                     }
                 )
                 if (index < steps.size - 1) {
@@ -103,19 +108,24 @@ fun TrainingScreen(
 @Composable
 private fun StepCard(
     step: TrainingStep,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onSkip: () -> Unit
 ) {
+    val isSkipped = step.status == "skipped"
+
     val statusColor = when (step.status) {
-        "completed" -> SuccessGreen
-        "running" -> Primary
-        "failed" -> ErrorRed
-        else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+        "completed" -> Color(0xFF333333)
+        "running" -> Color(0xFF333333)
+        "failed" -> Color(0xFFBBBBBB)
+        "skipped" -> Color(0xFFCCCCCC)
+        else -> Color(0xFFCCCCCC)
     }
 
     val statusText = when (step.status) {
         "completed" -> "已完成"
         "running" -> "进行中"
         "failed" -> "失败"
+        "skipped" -> "已跳过"
         else -> "未开始"
     }
 
@@ -123,6 +133,7 @@ private fun StepCard(
         "completed" -> Icons.Default.CheckCircle
         "running" -> Icons.Default.Pending
         "failed" -> Icons.Default.Error
+        "skipped" -> Icons.Default.SkipNext
         else -> Icons.Default.RadioButtonUnchecked
     }
 
@@ -133,7 +144,9 @@ private fun StepCard(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (step.status == "running") {
-                Primary.copy(alpha = 0.05f)
+                Color(0xFF333333).copy(alpha = 0.08f)
+            } else if (isSkipped) {
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             } else {
                 MaterialTheme.colorScheme.surface
             }
@@ -168,7 +181,9 @@ private fun StepCard(
                     Text(
                         text = step.name,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        textDecoration = if (isSkipped) TextDecoration.LineThrough else TextDecoration.None,
+                        color = if (isSkipped) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f) else MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     if (step.required) {
@@ -202,8 +217,22 @@ private fun StepCard(
                 Text(
                     text = step.description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    color = if (isSkipped) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    textDecoration = if (isSkipped) TextDecoration.LineThrough else TextDecoration.None
                 )
+                if (!step.required && step.status == "not_started") {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextButton(
+                        onClick = onSkip,
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "跳过",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                    }
+                }
             }
             Column(horizontalAlignment = Alignment.End) {
                 Icon(
@@ -237,8 +266,8 @@ private fun StepConnector(isCompleted: Boolean, isActive: Boolean) {
                 .width(2.dp)
                 .height(24.dp)
                 .background(
-                    if (isCompleted) SuccessGreen.copy(alpha = 0.5f)
-                    else if (isActive) Primary.copy(alpha = 0.5f)
+                    if (isCompleted) Color(0xFF333333).copy(alpha = 0.5f)
+                    else if (isActive) Color(0xFF333333).copy(alpha = 0.5f)
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
                 )
         )
@@ -254,7 +283,7 @@ private fun CurrentTrainingCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onNavigateToMonitor),
-        colors = CardDefaults.cardColors(containerColor = Primary.copy(alpha = 0.1f)),
+        colors = CardDefaults.cardColors(containerColor = PrimaryVariant.copy(alpha = 0.1f)),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -262,7 +291,7 @@ private fun CurrentTrainingCard(
                 Icon(
                     Icons.Default.Pending,
                     contentDescription = null,
-                    tint = Primary,
+                    tint = PrimaryVariant,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -270,7 +299,7 @@ private fun CurrentTrainingCard(
                     text = "当前训练任务",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = Primary
+                    color = PrimaryVariant
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -293,13 +322,13 @@ private fun CurrentTrainingCard(
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp)),
-                color = Primary
+                color = PrimaryVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "点击查看详情",
                 style = MaterialTheme.typography.labelMedium,
-                color = Primary
+                color = PrimaryVariant
             )
         }
     }

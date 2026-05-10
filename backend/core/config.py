@@ -9,6 +9,13 @@ OUT_DIR = os.path.join(MINIMIND_ROOT, 'out')
 CHECKPOINTS_DIR = os.path.join(MINIMIND_ROOT, 'checkpoints')
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), '..', 'uploads')
 LLM_API_CONFIG_PATH = os.path.join(os.path.dirname(__file__), '..', 'llm_api_config.json')
+RESOURCE_LIMITS_CONFIG_PATH = os.path.join(os.path.dirname(__file__), '..', 'resource_limits_config.json')
+
+DEFAULT_RESOURCE_LIMITS = {
+    "max_cpu_percent": 80,
+    "max_memory_mb": 2048,
+    "max_training_processes": 1
+}
 
 DEFAULT_DEVICE = "cpu"
 DEFAULT_DTYPE = "float32"
