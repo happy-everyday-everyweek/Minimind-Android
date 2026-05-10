@@ -1,26 +1,55 @@
-# MiniMind Android 移动端 + 本地 Linux 后端分离架构 Spec
+# MiniMind Android 移动端 - 内嵌 Linux 后端开箱即用架构 Spec
 
 ## Why
-MiniMind 目前仅有 Streamlit WebUI 和 OpenAI 兼容 API 服务端，无法在移动端直接使用。需要构建一个前后端分离的架构：Android 原生应用作为前端，在手机本地运行的 Linux 实例（Termux）中部署后端服务，使 MiniMind 能够在安卓手机上以原生体验进行对话交互，所有计算和数据均在本地完成，无需远程服务器。
+MiniMind 目前仅有 Streamlit WebUI 和 OpenAI 兼容 API 服务端，无法在移动端直接使用。需要构建一个前后端分离的 Android 应用：前端使用 Android 原生（Kotlin + Jetpack Compose），后端使用内嵌在 APK 中的 Linux 运行环境（proot），将 Python 解释器、PyTorch、模型文件及所有依赖全部封装在 APK 内，用户安装 APK 后即可开箱即用，无需额外安装 Termux 或手动配置任何环境。
 
 ## What Changes
-- 后端：基于现有 `serve_openai_api.py` 扩展，增加健康检查、模型列表等端点，适配 Termux 环境运行
+- 后端：基于现有 `serve_openai_api.py` 扩展，增加健康检查、模型列表等端点，适配 proot 环境运行
+- 内嵌 Linux 运行环境：将 proot 二进制、精简 Linux rootfs（含 Python + PyTorch + transformers）、模型文件打包到 APK assets 中
 - 前端：新建 Android 原生项目（Kotlin + Jetpack Compose），实现聊天界面、流式响应、思考过程展示、工具调用展示、参数配置、多语言（中/英）、会话历史管理
-- 本地通信：Android 前端通过 localhost HTTP/SSE 与 Termux 中运行的后端 API 交互
-- 部署：提供 Termux 一键部署脚本，在手机本地 Linux 环境中安装依赖、配置并启动后端服务
+- 本地通信：Android 前端通过 localhost HTTP/SSE 与内嵌 Linux 环境中运行的后端 API 交互
+- 服务生命周期管理：Android 应用负责内嵌 Linux 后端服务的启动、停止和状态监控
 
 ## Impact
 - Affected specs: `serve_openai_api.py` 需扩展端点
-- Affected code: `scripts/serve_openai_api.py`（后端增强）、新增 Android 项目目录 `android/`、新增部署脚本 `scripts/deploy_termux.sh`
+- Affected code: `scripts/serve_openai_api.py`（后端增强）、新增 Android 项目目录 `android/`、新增 Linux rootfs 构建脚本
 - 现有训练、模型代码不受影响
 
 ---
 
 ## ADDED Requirements
 
+### Requirement: 内嵌 Linux 运行环境
+
+APK SHALL 内嵌一个完整的 Linux 运行环境，无需用户额外安装任何软件：
+
+#### Scenario: 首次启动初始化
+- **WHEN** 用户首次安装并打开 APK
+- **THEN** 应用从 APK assets 中提取 proot 二进制和 Linux rootfs 到应用内部存储
+- **WHEN** 提取完成后
+- **THEN** 应用自动在 proot 环境中启动后端 API 服务
+
+#### Scenario: 后续启动
+- **WHEN** 用户再次打开应用且 rootfs 已解压
+- **THEN** 跳过解压步骤，直接启动后端服务
+
+#### Scenario: proot 运行环境
+- **WHEN** 后端服务在 proot 环境中运行
+- **THEN** Python 解释器、PyTorch、transformers 等依赖均可用
+- **WHEN** proot 环境中无 CUDA
+- **THEN** 后端自动使用 CPU 推理，打印警告而非报错
+
+#### Scenario: 模型文件管理
+- **WHEN** 模型文件打包在 APK assets 中
+- **THEN** 首次启动时解压到内部存储，后续直接加载
+- **WHEN** 模型文件较大导致 APK 体积过大
+- **THEN** 支持首次启动时从网络下载模型到内部存储（可选方案）
+
+---
+
 ### Requirement: 后端 API 增强
 
-后端 SHALL 在现有 `serve_openai_api.py` 基础上扩展以下能力，适配 Termux 本地运行环境：
+后端 SHALL 在现有 `serve_openai_api.py` 基础上扩展以下能力：
 
 #### Scenario: 健康检查
 - **WHEN** 客户端发送 `GET /v1/health`
@@ -38,11 +67,9 @@ MiniMind 目前仅有 Streamlit WebUI 和 OpenAI 兼容 API 服务端，无法�
 - **WHEN** 客户端发送 `POST /v1/chat/completions` 且 `stream: false`
 - **THEN** 后端返回完整 JSON 响应
 
-#### Scenario: Termux 环境适配
-- **WHEN** 后端在 Termux 环境中启动
-- **THEN** 自动检测运行设备（CPU/GPU），默认使用 CPU 模式运行
-- **WHEN** Termux 环境中无 CUDA 可用
-- **THEN** 后端自动 fallback 到 CPU 推理，不报错退出
+#### Scenario: 服务关闭端点
+- **WHEN** 客户端发送 `POST /v1/shutdown`
+- **THEN** 后端优雅关闭，释放资源
 
 ---
 
@@ -50,13 +77,19 @@ MiniMind 目前仅有 Streamlit WebUI 和 OpenAI 兼容 API 服务端，无法�
 
 Android 应用 SHALL 使用 Kotlin + Jetpack Compose 构建，提供以下功能：
 
-#### Scenario: 本地服务连接配置
-- **WHEN** 用户首次打开应用或进入设置页面
-- **THEN** 用户可配置本地服务地址（默认 `http://127.0.0.1:8998`）和端口
-- **WHEN** 用户保存配置后
-- **THEN** 应用自动测试与本地 Termux 服务的连接并提示连接状态
-- **WHEN** 本地服务未启动
-- **THEN** 应用提示用户需先在 Termux 中启动后端服务
+#### Scenario: 开箱即用体验
+- **WHEN** 用户安装 APK 后首次打开
+- **THEN** 应用自动初始化内嵌 Linux 环境并启动后端服务，显示初始化进度
+- **WHEN** 后端服务就绪后
+- **THEN** 自动进入聊天界面，无需用户手动配置
+
+#### Scenario: 后端服务生命周期管理
+- **WHEN** 应用启动时后端服务未运行
+- **THEN** 应用自动启动后端服务
+- **WHEN** 应用退出时
+- **THEN** 应用通知后端服务优雅关闭
+- **WHEN** 后端服务异常崩溃
+- **THEN** 应用检测到并自动重启服务
 
 #### Scenario: 聊天对话
 - **WHEN** 用户输入消息并发送
@@ -84,35 +117,29 @@ Android 应用 SHALL 使用 Kotlin + Jetpack Compose 构建，提供以下功能
 - **WHEN** 用户在设置中切换语言（中文/English）
 - **THEN** 应用界面文本切换为对应语言
 
-#### Scenario: 本地服务异常处理
-- **WHEN** 本地 Termux 服务未启动或无响应
-- **THEN** 应用显示友好提示，引导用户启动 Termux 服务，不崩溃
+#### Scenario: 服务异常处理
+- **WHEN** 内嵌后端服务启动失败或无响应
+- **THEN** 应用显示友好错误提示和重试按钮，不崩溃
 - **WHEN** 流式传输中断
 - **THEN** 应用保留已接收的内容并提示连接中断
 
 ---
 
-### Requirement: Termux 本地部署方案
+### Requirement: Linux rootfs 构建脚本
 
-后端 SHALL 支持在 Android 手机的 Termux 环境中一键部署和运行：
+项目 SHALL 提供自动化脚本构建精简 Linux rootfs：
 
-#### Scenario: Termux 一键部署
-- **WHEN** 用户在 Termux 中运行部署脚本
-- **THEN** 脚本自动安装 Python、pip 依赖、下载/配置模型文件、启动 API 服务
-- **WHEN** 部署脚本检测到已安装的环境
-- **THEN** 跳过已完成的步骤，仅更新缺失部分
+#### Scenario: rootfs 构建
+- **WHEN** 开发者运行 rootfs 构建脚本
+- **THEN** 脚本自动创建精简 Linux rootfs，包含 Python、PyTorch（CPU ARM64）、transformers、模型文件等
+- **WHEN** 构建完成
+- **THEN** rootfs 可打包为压缩包供 APK assets 使用
 
-#### Scenario: Termux 服务管理
-- **WHEN** 用户在 Termux 中执行启动命令
-- **THEN** 后端服务在后台启动，监听 `127.0.0.1:8998`
-- **WHEN** 用户执行停止命令
-- **THEN** 后端服务正确停止
-
-#### Scenario: 模型文件管理
-- **WHEN** 用户首次部署时本地无模型文件
-- **THEN** 部署脚本提示用户下载模型或指定本地模型路径
-- **WHEN** 用户指定了模型路径
-- **THEN** 后端使用指定路径加载模型
+#### Scenario: rootfs 体积优化
+- **WHEN** 构建 rootfs 时
+- **THEN** 剔除不必要的文件（文档、测试、缓存等），最小化体积
+- **WHEN** PyTorch 仅需 CPU 版本
+- **THEN** 仅安装 CPU 版本的 torch 以减少体积
 
 ---
 
@@ -122,7 +149,8 @@ Android 应用 SHALL 使用 Kotlin + Jetpack Compose 构建，提供以下功能
 原有的 `serve_openai_api.py` 需增加以下端点，同时保持现有 `/v1/chat/completions` 端点完全兼容：
 - `GET /v1/health` - 健康检查
 - `GET /v1/models` - 模型信息
-- 默认绑定地址改为 `127.0.0.1`（本地安全），可通过 `--host` 参数覆盖
+- `POST /v1/shutdown` - 优雅关闭
+- 默认绑定地址为 `127.0.0.1`，可通过 `--host` 参数覆盖
 - CPU fallback 逻辑：无 CUDA 时自动使用 CPU，打印警告而非报错
 
 ## REMOVED Requirements

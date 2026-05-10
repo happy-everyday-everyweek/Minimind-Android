@@ -1,17 +1,23 @@
 - [ ] 后端 `GET /v1/health` 端点返回正确的健康状态
 - [ ] 后端 `GET /v1/models` 端点返回模型信息，格式兼容 OpenAI API
-- [ ] 后端 CORS 中间件正确处理跨域请求
-- [ ] 后端 Bearer Token 鉴权：携带正确 token 请求成功，错误 token 返回 401，未配置 api_key 时跳过鉴权
+- [ ] 后端 `POST /v1/shutdown` 端点可优雅关闭服务
+- [ ] 后端默认绑定 `127.0.0.1`，`--host` 参数可覆盖
+- [ ] 后端无 CUDA 时自动 fallback 到 CPU，不报错退出
 - [ ] 后端现有 `/v1/chat/completions` 流式和非流式响应功能不受影响
-- [ ] 部署脚本 `deploy_linux.sh` 可在全新 Linux 实例上完成一键部署
-- [ ] systemd service 文件支持 start/stop/restart 操作
-- [ ] Android 项目可成功编译构建
-- [ ] Android 客户端可配置服务器地址和 API Key，连接测试正常
+- [ ] `build_rootfs.sh` 可构建包含 Python + PyTorch(CPU ARM64) + transformers + 模型文件的精简 rootfs
+- [ ] rootfs 压缩包体积经过优化（剔除缓存、文档、测试等）
+- [ ] proot ARM64 二进制可正常编译
+- [ ] Android 项目可成功编译构建 APK
+- [ ] APK 首次启动时自动从 assets 解压 rootfs 到内部存储
+- [ ] APK 后续启动跳过解压，直接启动后端服务
+- [ ] proot 环境中后端服务可正常启动并监听 127.0.0.1:8998
+- [ ] Android 应用显示初始化进度（rootfs 解压、服务启动）
 - [ ] Android 聊天页面可发送消息并接收流式响应，逐字显示
 - [ ] Android 思考内容以可折叠区域展示
 - [ ] Android 工具调用以卡片形式展示
 - [ ] Android 参数设置（Temperature、Max Tokens、历史轮次、思考模式）生效
 - [ ] Android 会话历史保存在本地 Room 数据库，重启应用后可恢复
 - [ ] Android 多语言切换（中文/English）正常工作
-- [ ] Android 网络异常时显示友好提示，不崩溃
-- [ ] 端到端：Android 客户端连接 Linux 后端完成一次完整对话（含流式响应）
+- [ ] Android 应用退出时优雅关闭后端服务
+- [ ] Android 后端服务异常崩溃时应用可检测并自动重启
+- [ ] 端到端：安装 APK -> 自动初始化 -> 完成一次完整对话（含流式响应）
