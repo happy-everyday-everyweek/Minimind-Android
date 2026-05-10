@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.github.devatherock</groupId>
+  <artifactId>jul-jsonformatter</artifactId>
+  <version>1.1.0</version>
+  <description>java.util.logging.Formatter to log messages as JSON, compatible with Logstash</description>
+  <name>jul-jsonformatter</name>
+  <url>https://github.com/devatherock/jul-jsonformatter</url>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://github.com/devatherock/jul-jsonformatter/blob/master/LICENSE.txt</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>devatherock</id>
+      <name>Devaprasadh Xavier</name>
+      <email>devatherock@gmail.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <url>https://github.com/devatherock/jul-jsonformatter/</url>
+  </scm>
+</project>
