@@ -10,17 +10,21 @@ MiniMind 当前仅提供命令行和 Web 端交互方式，用户需要在 PC �
 - 新增后端 API 服务，封装 MiniMind 现有的训练脚本和推理接口
 - 新增训练可视化配置界面，用户可在手机上配置训练参数、监控训练进度
 - 新增 Agentic RL 可视化环境编辑器，用户可通过可视化界面配置智能体环境、工具和奖励函数
-- 新增黑盒知识蒸馏功能，用户可配置外部 LLM API（DeepSeek、智谱等）作为教师模型
+- 新增黑盒知识蒸馏功能，用户可配置外部 LLM API 作为教师模型（不限定厂商）
 - 使用项目已有的训练好的 Tokenizer，不暴露 Tokenizer 训练步骤给用户
+- UI 配色使用黑白灰色调，不使用任何其他颜色
+- 非必须训练步骤支持跳过
+- 所有功能提供面向普通用户的详细说明
+- 支持系统资源占用上限设置
 
 ## Impact
-- Affected specs: 推理能力、训练能力、模型管理、数据管理
+- Affected specs: 推理能力、训练能力、模型管理、数据管理、资源管理
 - Affected code: 新增 Android 前端项目、新增后端 API 服务层、复用现有 trainer/ 和 model/ 代码
 
 ## ADDED Requirements
 
 ### Requirement: Android 原生前端应用
-系统 SHALL 提供一个 Android 原生应用，包含三个顶级页面（底部导航栏切换）：开始、推理、训练。
+系统 SHALL 提供一个 Android 原生应用，包含三个顶级页面（底部导航栏切换）：开始、推理、训练。UI 配色使用黑白灰色调，不使用任何其他颜色。
 
 #### Scenario: 用户启动应用
 - **WHEN** 用户首次打开应用
@@ -31,22 +35,22 @@ MiniMind 当前仅提供命令行和 Web 端交互方式，用户需要在 PC �
 - **THEN** 切换到对应页面，保持页面状态
 
 ### Requirement: 开始页面
-系统 SHALL 提供一个"开始"页面，作为应用首页，展示应用概览和快捷入口。
+系统 SHALL 提供一个"开始"页面，作为应用首页，展示应用概览和快捷入口，并提供面向普通用户的应用介绍和训练流程说明。
 
 #### Scenario: 查看开始页面
 - **WHEN** 用户进入开始页面
-- **THEN** 显示：应用简介、后端服务状态指示器、快速开始卡片（如"开始对话"、"开始训练"）、最近活动记录
+- **THEN** 显示：应用简介（包含训练流程的通俗说明）、后端服务状态指示器、快速开始卡片（如"开始对话"、"开始训练"）、最近活动记录
 
 #### Scenario: 后端服务状态异常
 - **WHEN** 后端 Linux 实例未运行或异常
 - **THEN** 显示错误状态和"重新初始化"按钮
 
 ### Requirement: 推理页面
-系统 SHALL 提供一个"推理"页面，用户可与模型进行对话交互。
+系统 SHALL 提供一个"推理"页面，用户可与模型进行对话交互，并提供可折叠的推理参数说明。
 
 #### Scenario: 进入推理页面
 - **WHEN** 用户进入推理页面
-- **THEN** 显示模型选择器（列出可用模型权重）、对话界面、推理参数配置（temperature、top_p、max_tokens、open_thinking 开关）
+- **THEN** 显示模型选择器（列出可用模型权重）、对话界面、推理参数配置（temperature、top_p、max_tokens、open_thinking 开关）、可折叠的参数说明
 
 #### Scenario: 发送消息
 - **WHEN** 用户输入消息并发送
@@ -57,27 +61,46 @@ MiniMind 当前仅提供命令行和 Web 端交互方式，用户需要在 PC �
 - **THEN** 后端加载对应权重，后续推理使用新模型
 
 ### Requirement: 训练页面
-系统 SHALL 提供一个"训练"页面，包含训练流程的各阶段入口，用户可从预训练到后训练完整执行。
+系统 SHALL 提供一个"训练"页面，包含训练流程的各阶段入口，用户可从预训练到后训练完整执行。非必须步骤支持跳过。
 
 #### Scenario: 查看训练页面
 - **WHEN** 用户进入训练页面
-- **THEN** 显示训练流程步骤列表，每个步骤显示状态（未开始/进行中/已完成），以及训练进度和日志查看入口
+- **THEN** 显示训练流程步骤列表，每个步骤显示状态（未开始/进行中/已完成/已跳过），以及训练进度和日志查看入口
 
 #### Scenario: 训练流程步骤
 - **THEN** 训练页面 SHALL 展示以下步骤（按顺序）：
   1. 预训练 (Pretrain) - 必须
   2. 有监督微调 (SFT) - 必须
-  3. 黑盒知识蒸馏 (Black-box Distillation) - 可选
-  4. LoRA 微调 - 可选
-  5. 强化学习 (RL) - 可选，内含 DPO/PPO/GRPO 三种算法选择
-  6. Agentic RL - 可选
+  3. 知识蒸馏 - 可选，可跳过
+  4. LoRA 微调 - 可选，可跳过
+  5. 强化学习 (RL) - 可选，可跳过，内含 DPO/PPO/GRPO 三种算法选择
+  6. Agentic RL - 可选，可跳过
+
+#### Scenario: 跳过非必须步骤
+- **WHEN** 用户点击非必须步骤的"跳过"按钮
+- **THEN** 该步骤标记为"已跳过"，流程自动进入下一步
+
+### Requirement: 面向普通用户的详细说明
+系统 SHALL 在所有功能页面提供面向普通用户的详细说明，使用通俗语言解释技术概念。
+
+#### Scenario: 训练步骤说明
+- **WHEN** 用户查看训练流程步骤
+- **THEN** 每个步骤显示面向普通用户的详细说明，使用通俗类比解释技术概念
+
+#### Scenario: 配置页面说明
+- **WHEN** 用户进入任何训练配置页面
+- **THEN** 页面顶部显示说明卡片，解释该训练步骤的目的、原理和配置项含义
+
+#### Scenario: 推理参数说明
+- **WHEN** 用户展开推理参数说明
+- **THEN** 显示 temperature、top_p、max_tokens、open_thinking 各参数的通俗解释
 
 ### Requirement: 预训练配置与执行
 系统 SHALL 允许用户配置并执行预训练。
 
 #### Scenario: 配置预训练
 - **WHEN** 用户点击"预训练"步骤
-- **THEN** 显示配置界面，包含：数据集选择（pretrain_t2t / pretrain_t2t_mini）、模型配置（dim、n_layers）、训练参数（learning_rate、batch_size、epochs、save_interval）、输出权重名称
+- **THEN** 显示配置界面，包含：数据集选择（pretrain_t2t / pretrain_t2t_mini）、模型配置（dim、n_layers）、训练参数（learning_rate、batch_size、epochs、save_interval）、输出权重名称，以及面向普通用户的说明
 
 #### Scenario: 执行预训练
 - **WHEN** 用户启动预训练
@@ -88,18 +111,18 @@ MiniMind 当前仅提供命令行和 Web 端交互方式，用户需要在 PC �
 
 #### Scenario: 配置 SFT
 - **WHEN** 用户点击"SFT"步骤
-- **THEN** 显示配置界面，包含：基础权重选择（预训练输出权重）、数据集选择（sft_t2t / sft_t2t_mini）、训练参数（learning_rate、batch_size、epochs、max_seq_len）
+- **THEN** 显示配置界面，包含：基础权重选择（预训练输出权重）、数据集选择（sft_t2t / sft_t2t_mini）、训练参数（learning_rate、batch_size、epochs、max_seq_len），以及面向普通用户的说明
 
 #### Scenario: 执行 SFT
 - **WHEN** 用户启动 SFT
 - **THEN** 后端执行 train_full_sft.py，前端实时显示训练 loss 曲线和日志
 
-### Requirement: 黑盒知识蒸馏
-系统 SHALL 提供黑盒知识蒸馏功能，用户可配置外部 LLM API 作为教师模型。
+### Requirement: 知识蒸馏
+系统 SHALL 提供黑盒知识蒸馏功能，用户可配置外部 LLM API 作为教师模型。不限定任何特定厂商，不提供预设或暗示性选项。
 
 #### Scenario: 配置知识蒸馏
 - **WHEN** 用户点击"知识蒸馏"步骤
-- **THEN** 显示配置界面，包含：教师模型 API 配置（API 地址、API Key、模型名称，支持 DeepSeek、智谱等 OpenAI 兼容 API）、学生模型权重选择、蒸馏数据集配置、训练参数
+- **THEN** 显示配置界面，包含：教师模型 API 配置（API 地址、API Key、模型名称，均为纯输入框，无预设值）、学生模型权重选择、蒸馏数据集配置、训练参数，以及面向普通用户的说明
 
 #### Scenario: 执行知识蒸馏
 - **WHEN** 用户启动知识蒸馏
@@ -110,18 +133,18 @@ MiniMind 当前仅提供命令行和 Web 端交互方式，用户需要在 PC �
 
 #### Scenario: 配置 LoRA
 - **WHEN** 用户点击"LoRA 微调"步骤
-- **THEN** 显示配置界面，包含：基础权重选择、LoRA 数据集（支持用户自定义 jsonl 上传）、LoRA 参数（rank、alpha）、训练参数
+- **THEN** 显示配置界面，包含：基础权重选择、LoRA 数据集（支持用户自定义 jsonl 上传）、LoRA 参数（rank、alpha）、训练参数，以及面向普通用户的说明（包含 rank 和 alpha 参数的解释）
 
 #### Scenario: 执行 LoRA
 - **WHEN** 用户启动 LoRA 训练
 - **THEN** 后端执行 train_lora.py，前端显示训练进度
 
 ### Requirement: 强化学习训练
-系统 SHALL 提供强化学习训练步骤，用户可选择 DPO、PPO 或 GRPO 算法。
+系统 SHALL 提供强化学习训练步骤，用户可选择 DPO、PPO 或 GRPO 算法，并显示三种算法的通俗说明。
 
 #### Scenario: 配置强化学习
 - **WHEN** 用户点击"强化学习"步骤
-- **THEN** 显示算法选择器（DPO / PPO / GRPO），根据选择显示对应配置参数：
+- **THEN** 显示算法选择器（DPO / PPO / GRPO），根据选择显示对应配置参数，以及三种算法的通俗说明：
   - DPO：基础权重选择、偏好数据集、beta 参数
   - PPO：基础权重选择、RL 数据集、KL 系数、clip epsilon
   - GRPO：基础权重选择、RL 数据集、分组大小、KL 系数、loss_type（grpo/cispo）
@@ -131,14 +154,14 @@ MiniMind 当前仅提供命令行和 Web 端交互方式，用户需要在 PC �
 - **THEN** 后端执行对应训练脚本，前端显示 reward 曲线和训练日志
 
 ### Requirement: Agentic RL 训练
-系统 SHALL 提供 Agentic RL 训练功能，包含可视化环境编辑器。
+系统 SHALL 提供 Agentic RL 训练功能，包含可视化环境编辑器，各区域提供面向普通用户的说明。
 
 #### Scenario: 可视化环境编辑
 - **WHEN** 用户点击"Agentic RL"步骤
 - **THEN** 显示可视化环境编辑器，用户可：
-  - 定义工具（Tool）列表：工具名称、参数 schema、描述
-  - 配置奖励函数：通过可视化规则编辑器定义奖励条件（格式正确性、工具调用合法性、结果匹配等），或通过 LLM API 辅助生成奖励函数代码
-  - 配置测试场景：用户输入、预期工具调用、预期输出
+  - 定义工具（Tool）列表：工具名称、参数 schema、描述（附说明）
+  - 配置奖励函数：通过可视化规则编辑器定义奖励条件（附说明），或通过 LLM API 辅助生成奖励函数代码
+  - 配置测试场景：用户输入、预期工具调用、预期输出（附说明）
 
 #### Scenario: 配置 Agentic RL 训练
 - **WHEN** 用户完成环境编辑后进入训练配置
@@ -193,12 +216,23 @@ MiniMind 当前仅提供命令行和 Web 端交互方式，用户需要在 PC �
 - **THEN** 用户可暂停/恢复/停止训练，训练断点自动保存，支持从断点恢复
 
 ### Requirement: LLM API 辅助配置
-系统 SHALL 允许用户配置外部 LLM API，用于辅助生成复杂配置。
+系统 SHALL 允许用户配置外部 LLM API，用于辅助生成复杂配置。不限定任何特定厂商，不提供预设或暗示性选项。
 
 #### Scenario: 配置 LLM API
-- **WHEN** 用户在设置中配置 LLM API（API 地址、Key、模型名）
+- **WHEN** 用户在设置中配置 LLM API（API 地址、Key、模型名，均为纯输入框）
 - **THEN** 系统保存配置，可在知识蒸馏和 Agentic RL 奖励函数生成中使用
 
 #### Scenario: AI 辅助生成奖励函数
 - **WHEN** 用户在 Agentic RL 环境编辑器中点击"AI 生成奖励函数"
 - **THEN** 系统将当前工具定义和场景描述发送给配置的 LLM API，返回奖励函数代码建议，用户确认后应用
+
+### Requirement: 系统资源占用上限
+系统 SHALL 允许用户设置系统资源占用上限，防止训练任务占用过多资源导致手机卡顿。
+
+#### Scenario: 配置资源限制
+- **WHEN** 用户在设置中配置资源限制
+- **THEN** 可设置：CPU 使用率上限（0-100%）、内存使用上限（MB）、最大同时训练进程数
+
+#### Scenario: 资源限制生效
+- **WHEN** 用户启动新的训练任务
+- **THEN** 系统检查当前资源使用情况，若超过限制则拒绝启动并提示用户
