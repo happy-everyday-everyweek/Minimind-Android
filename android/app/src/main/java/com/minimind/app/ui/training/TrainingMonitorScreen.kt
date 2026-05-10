@@ -146,9 +146,8 @@ fun TrainingMonitorScreen(
                         Text("训练进度", style = MaterialTheme.typography.bodyMedium)
                         Spacer(modifier = Modifier.width(8.dp))
                         LinearProgressIndicator(
-                            progress = status.step.toFloat() / status.totalSteps,
+                            progress = { status.step.toFloat() / status.totalSteps },
                             modifier = Modifier.weight(1f).height(8.dp),
-                            shape = RoundedCornerShape(4.dp),
                             color = PrimaryVariant
                         )
                         Spacer(modifier = Modifier.width(8.dp))

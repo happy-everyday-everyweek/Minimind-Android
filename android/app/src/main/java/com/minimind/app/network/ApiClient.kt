@@ -43,7 +43,7 @@ object ApiClient {
         retrofit.create(ApiService::class.java)
     }
 
-    fun getOkHttpClient(): OkHttpClient = okHttpClient
+    fun fetchOkHttpClient(): OkHttpClient = okHttpClient
 
     fun updateBaseUrl(url: String) {
         if (url != baseUrl) {

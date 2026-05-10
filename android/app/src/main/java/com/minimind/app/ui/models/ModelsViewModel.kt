@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.minimind.app.network.ApiClient
 import com.minimind.app.network.model.ModelWeight
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

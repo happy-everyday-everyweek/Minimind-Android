@@ -11,6 +11,7 @@ import com.minimind.app.network.model.ModelInfo
 import com.minimind.app.network.model.StreamToken
 import com.minimind.app.network.model.TrainingStatus
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -110,7 +111,7 @@ class InferenceViewModel : ViewModel() {
                 val response = withContext(Dispatchers.IO) {
                     ApiClient.apiService.getModels()
                 }
-                _models.value = response.models
+                _models.value = response.models.map { ModelInfo(it.id, it.name, it.size, it.source) }
                 if (_selectedModelId.value.isEmpty() && response.models.isNotEmpty()) {
                     _selectedModelId.value = response.models.first().id
                 }

@@ -163,13 +163,11 @@ fun DatasetsScreen(
                             shape = RoundedCornerShape(8.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                         ) {
-                            SelectionContainer {
-                                Text(
-                                    text = sample,
-                                    modifier = Modifier.padding(8.dp),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
+                            Text(
+                                text = sample,
+                                modifier = Modifier.padding(8.dp),
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }

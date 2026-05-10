@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -84,7 +85,7 @@ fun LoraConfigScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
                         IconButton(onClick = { fromWeightExpanded = true }) {
-                            Icon(androidx.compose.material.icons.Icons.Default.ArrowDropDown, null)
+                            Icon(Icons.Filled.ArrowDropDown, null)
                         }
                     }
                 )

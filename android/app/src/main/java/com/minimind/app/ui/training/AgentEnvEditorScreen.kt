@@ -366,7 +366,7 @@ fun AgentEnvEditorScreen(onBack: () -> Unit) {
                             val requestBody = gson.toJson(requestMap)
                                 .toRequestBody("application/json".toMediaType())
                             val result = withContext(Dispatchers.IO) {
-                                val client = ApiClient.getOkHttpClient()
+                                val client = ApiClient.fetchOkHttpClient()
                                 val request = Request.Builder()
                                     .url("${ApiClient.getBaseUrl()}/api/config/generate-reward-function")
                                     .post(requestBody)
@@ -413,13 +413,11 @@ fun AgentEnvEditorScreen(onBack: () -> Unit) {
                             fontWeight = FontWeight.SemiBold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        SelectionContainer {
-                            Text(
-                                text = generatedRewardCode,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                            )
-                        }
+                        Text(
+                            text = generatedRewardCode,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                        )
                     }
                 }
             }

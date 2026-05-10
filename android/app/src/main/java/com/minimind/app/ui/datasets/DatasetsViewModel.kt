@@ -109,7 +109,7 @@ class DatasetsViewModel : ViewModel() {
                         .url("${ApiClient.getBaseUrl()}/api/datasets/upload")
                         .post(multipartBody)
                         .build()
-                    val response = ApiClient.getOkHttpClient().newCall(request).execute()
+                    val response = ApiClient.fetchOkHttpClient().newCall(request).execute()
                     if (!response.isSuccessful) {
                         throw Exception("上传失败: HTTP ${response.code}")
                     }

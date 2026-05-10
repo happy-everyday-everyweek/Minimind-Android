@@ -6,6 +6,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -87,7 +89,7 @@ fun AgentConfigScreen(
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
                         IconButton(onClick = { fromWeightExpanded = true }) {
-                            Icon(androidx.compose.material.icons.Icons.Default.ArrowDropDown, null)
+                            Icon(Icons.Filled.ArrowDropDown, null)
                         }
                     }
                 )
@@ -111,7 +113,7 @@ fun AgentConfigScreen(
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
                         IconButton(onClick = { lossTypeExpanded = true }) {
-                            Icon(androidx.compose.material.icons.Icons.Default.ArrowDropDown, null)
+                            Icon(Icons.Filled.ArrowDropDown, null)
                         }
                     }
                 )
@@ -167,7 +169,7 @@ fun AgentConfigScreen(
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(Icons.Default.Edit, contentDescription = null)
+                Icon(Icons.Filled.Edit, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("编辑环境")
             }
